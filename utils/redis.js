@@ -16,8 +16,8 @@ class RedisClient {
 
   async get(key) {
     try {
-      const promisifiedClient = util.promisify(this.client.get).bind(this.client);
-      const value = await promisifiedClient(key);
+      const asyncGet = util.promisify(this.client.get).bind(this.client);
+      const value = await asyncGet(key);
 
       return value;
     } catch (err) {
@@ -28,8 +28,8 @@ class RedisClient {
 
   async set(key, value, duration) {
     try {
-      const promisifiedClient = util.promisify(this.client.setex).bind(this.client);
-      await promisifiedClient(key, duration, value);
+      const asyncSet = util.promisify(this.client.setex).bind(this.client);
+      await asyncSet(key, duration, value);
     } catch (err) {
       console.error(err);
     }
@@ -37,8 +37,8 @@ class RedisClient {
 
   async del(key) {
     try {
-      const promisifiedClient = util.promisify(this.client.del).bind(this.client);
-      await promisifiedClient(key);
+      const asyncDel = util.promisify(this.client.del).bind(this.client);
+      await asyncDel(key);
     } catch (err) {
       console.error(err);
     }

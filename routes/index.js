@@ -3,12 +3,10 @@ import express from 'express';
 
 const router = express.Router();
 
-router.get('/status', (req, res) => {
-    AppController.getStatus(req, res);
-})
+router.get('/status', AppController.getStatus);
 
-router.get('/stats', (req, res) => {
-    AppController.getStats(req, res);
-})
+router.get('/stats', AppController.getStats);
+
+router.post('/users', UsersController.postNew);
 
 export default router;
