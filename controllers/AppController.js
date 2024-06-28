@@ -3,7 +3,7 @@ import dbClient from "../utils/db";
 
 export default class AppContoller {
     static getStatus(req, res) {
-        const response = {"redis": redisClient.isAlive, "db": dbClient.isAlive};
+        const response = {"redis": redisClient.isAlive(), "db": dbClient.isAlive()};
         res.status(200).send(response);
     }
 
