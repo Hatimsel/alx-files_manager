@@ -1,5 +1,6 @@
 import dbClient from "../utils/db";
 import sha1 from 'sha1';
+import redisClient from "../utils/redis";
 
 export default class UsersController {
     static async postNew(req, res) {
@@ -22,6 +23,23 @@ export default class UsersController {
             } catch(err) {
                 res.status(500).send('Failed to add user');
             }
+        }
+    }
+
+    static async getMe(req, res) {
+        try {
+            const token = req.header('X-Token');
+            const key = `auth_${token}`;
+
+            const userId = await redisClient.get(key);
+            console.log(userId);
+            const user = await dbClient.db.collection('users')
+                        .findOne({userId});
+            console.log(user);
+            res.status(200).send(user);
+        } catch(err) {
+            console.log(err);
+            res.status(401).send({"error":"Unauthorized"});
         }
     }
 }
