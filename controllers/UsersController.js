@@ -27,7 +27,7 @@ export default class UsersController {
                     .insertOne({email, hashedPass});
                 res.status(201).send({"id": newUser.insertedId, "email": email});
             } catch(err) {
-                console.log(err);
+                // console.log(err);
                 res.status(500).send('Failed to add user');
             }
         }
@@ -48,7 +48,7 @@ export default class UsersController {
                 res.status(200).send({"id": user[0]._id, "email": user[0].email});
             }
         } catch(err) {
-            console.log(err);
+            // console.log(err);
             res.status(401).send({"error":"Unauthorized"});
         }
     }
