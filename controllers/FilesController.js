@@ -185,7 +185,7 @@ export default class FilesController {
             res.status(200).send(resultFiles);
         } catch (err) {
             console.error(err);
-            res.status(500).send({ "error": "Internal Server Error" });
+            res.status(401).send({"error":"Unauthorized"});
         }
     }
 }
