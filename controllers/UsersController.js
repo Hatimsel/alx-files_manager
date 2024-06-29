@@ -9,15 +9,18 @@ export default class UsersController {
         const { email, password } = req.body;
 
         if (!email) {
-            res.status(400).send({"error": "Missing email"});
+            // res.status(400).send({"error": "Missing email"});
+            res.status(400).json({ error: 'Missing email' });
             return;
         } else if (!password) {
-            res.status(400).send({"error": "Missing password"});
+            // res.status(400).send({"error": "Missing password"});
+            res.status(400).json({ error: 'Missing password' });
             return;
         } else {
             const emailExist = await dbClient.db.collection('users').findOne({email});
             if (emailExist) {
-                res.status(400).send({"error": "Already exist"});
+                // res.status(400).send({"error": "Already exist"});
+                res.status(400).json({ error: 'Already exist' });
                 return;
             }
 
@@ -25,10 +28,11 @@ export default class UsersController {
             try {
                 const newUser = await dbClient.db.collection('users')
                     .insertOne({email, hashedPass});
-                res.status(201).send({"id": newUser.insertedId, "email": email});
+                res.status(201).json({ email, id: userId });
+                // res.status(201).send({"id": newUser.insertedId, "email": email});
             } catch(err) {
                 // console.log(err);
-                res.status(500).send('Failed to add user');
+                res.status(401).send('Failed to add user');
             }
         }
     }
