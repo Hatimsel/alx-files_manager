@@ -1,7 +1,7 @@
 import dbClient from "../utils/db";
 import sha1 from 'sha1';
 import redisClient from "../utils/redis";
-const { ObjectId } = require('mongodb');
+import ObjectId from 'mongodb';
 
 
 export default class UsersController {
@@ -23,6 +23,7 @@ export default class UsersController {
                     .insertOne({email, hashedPass});
                 res.status(201).send({"id": newUser.insertedId, "email": email});
             } catch(err) {
+                console.log(err);
                 res.status(500).send('Failed to add user');
             }
         }

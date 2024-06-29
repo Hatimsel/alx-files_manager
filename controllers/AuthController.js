@@ -36,11 +36,10 @@ export default class AuthController {
         const token = req.header('X-Token');
         const key = `auth_${token}`;
         try {
-            const user = await redisClient.get(key);
-
             await redisClient.del(key);
             res.status(204).send();
         } catch(err) {
+            console.log(err);
             res.status(401).send({"error":"Unauthorized"});
         }
     }
