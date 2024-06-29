@@ -115,45 +115,6 @@ export default class FilesController {
         }
     }
 
-    // static async getIndex(req, res) {
-    //     const { parentId, page } = req.query;
-    //     const token = req.header('X-Token');
-    //     const key = `auth_${token}`;
-    //     try {
-    //         const userId = await redisClient.get(key);
-    //         if (!userId) {
-    //             return res.status(401).send({"error":"Unauthorized"});
-    //         }
-
-    //         let filesCursor = '';
-    //         if (parentId) {
-    //             if (page) {
-    //                 filesCursor = await dbClient.filesCollection.find({
-    //                     parentId
-    //                 }).skip(page * 20).limit(20);
-    //             } else {
-    //                 filesCursor = await dbClient.filesCollection.find({
-    //                     parentId
-    //                 }).limit(20);
-    //             }
-    //         } else if (page) {
-    //             filesCursor = await dbClient.filesCollection.find().skip(page * 20).limit(20);
-    //         } else {
-    //             filesCursor = await dbClient.filesCollection.find().limit(20);
-    //         }
-    //         const files = await filesCursor.toArray();
-            
-    //         const resultFiles = files.map(file => {
-    //             const { _id, ...rest } = file;
-    //             return { id: _id, ...rest };
-    //         });
-
-    //         res.status(200).send(resultFiles);
-    //     } catch(err) {
-    //         console.log(err);
-    //         res.status(401).send({"error":"Unauthorized"});
-    //     }
-    // }
     static async getIndex(req, res) {
         const { parentId, page } = req.query;
         const token = req.header('X-Token');
