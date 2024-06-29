@@ -53,8 +53,12 @@ export default class FilesController {
             };
 
             if (type === 'folder') {
-                await dbClient.filesCollection.insertOne(file);
-                res.status(201).send(file);
+                const result = await dbClient.filesCollection.insertOne(file);
+                file._id = result.insertedId;
+
+                const fileToReturn = { ...file, id: file._id };
+                delete fileToReturn._id;
+                res.status(201).send(fileToReturn);
             } else {
                 const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
                 const localPath = uuidv4();
@@ -64,8 +68,12 @@ export default class FilesController {
                 await fs.promises.writeFile(`${folderPath}/${localPath}`, base64.decode(data))
 
                 file['localPath'] = `${folderPath}/${localPath}`;
-                await dbClient.filesCollection.insertOne(file);
-                res.status(201).send(file);
+                const result = await dbClient.filesCollection.insertOne(file);
+                file._id = result.insertedId;
+                const fileToReturn = { ...file, id: file._id };
+                delete fileToReturn._id;
+                
+                res.status(201).send(fileToReturn);
             }
         } catch(err) {
             console.error(err);
