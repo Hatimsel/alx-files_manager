@@ -10,6 +10,5 @@ app.use(express.json());
 app.use(router);
 
 app.listen(port, () => {
-    // console.log(`Server starting on http://localhost:${port}`);
-    return;
+    console.log(`Server starting on http://localhost:${port}`);
 });

@@ -14,11 +14,12 @@ export default class AuthController {
         credentials = credentials.split(':');
 
         const email = credentials[0];
-        const hashedPass = sha1(credentials[1]);
+        const password = sha1(credentials[1]);
 
         try {
             const user = await dbClient.db.collection('users')
-                        .findOne({email, hashedPass});
+                        .findOne({email, password});
+            console.log(user);
             const token = uuidv4();
             const key = `auth_${token}`;
             const duration = 86400;
