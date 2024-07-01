@@ -138,13 +138,72 @@ export default class FilesController {
             const files = await filesCursor.toArray();
     
             const resultFiles = files.map(file => {
+                delete file.localPath;
                 const { _id, ...rest } = file;
                 return { id: _id, ...rest };
             });
     
-            delete resultFiles.localPath;
             res.status(200).send(resultFiles);
         } catch (err) {
+            console.error(err);
+            res.status(401).send({"error":"Unauthorized"});
+        }
+    }
+
+    static async putPublish(req, res) {
+        const { id } = req.params;
+        const token = req.header('X-Token');
+        const key = `auth_${token}`;
+        try {
+            const userId = await redisClient.get(key);
+            if (!userId) {
+                return res.status(401).send({ "error": "Unauthorized" });
+            }
+
+            const result = await dbClient.filesCollection
+                            .updateOne({userId, _id: ObjectId(id)}, {
+                                $set: {isPublic: true},
+                            });
+            if (!result) {
+                res.status(404).send({"error":"Not found"});
+            }
+            const updatedFile = await dbClient.filesCollection
+                                .findOne({userId, _id: ObjectId(id)});
+            if (updatedFile) {
+                delete updatedFile.localPath;
+                res.status(200).send(updatedFile);
+            }
+        } catch(err) {
+            console.error(err);
+            res.status(401).send({"error":"Unauthorized"});
+        }
+    }
+
+    static async putUnpublish(req, res) {
+        const { id } = req.params;
+        const _id = ObjectId(id);
+        const token = req.header('X-Token');
+        const key = `auth_${token}`;
+        try {
+            const userId = await redisClient.get(key);
+            if (!userId) {
+                return res.status(401).send({ "error": "Unauthorized" });
+            }
+
+            const result = await dbClient.filesCollection
+                            .updateOne({userId, _id}, {
+                                $set: {isPublic: false},
+                            });
+            if (!result) {
+                res.status(404).send({"error":"Not found"});
+            }
+            const updatedFile = await dbClient.filesCollection
+                                .findOne({userId, _id});
+            if (updatedFile) {
+                delete updatedFile.localPath;
+                res.status(200).send(updatedFile);
+            }
+        } catch(err) {
             console.error(err);
             res.status(401).send({"error":"Unauthorized"});
         }

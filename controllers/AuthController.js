@@ -19,7 +19,6 @@ export default class AuthController {
         try {
             const user = await dbClient.db.collection('users')
                         .findOne({email, password});
-            console.log(user);
             const token = uuidv4();
             const key = `auth_${token}`;
             const duration = 86400;
