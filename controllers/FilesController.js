@@ -117,7 +117,9 @@ export default class FilesController {
     }
 
     static async getIndex(req, res) {
-        const { parentId = '0', page = 0 } = req.query;
+        const parentId  = req.query.parentId || '0';
+        const page = parseInt(req.query.page, 10) || 0;
+        const pageSize = 20;
         const token = req.header('X-Token');
         const key = `auth_${token}`;
 
@@ -127,23 +129,18 @@ export default class FilesController {
                 return res.status(401).send({ error: "Unauthorized" });
             }
 
-            const pageNumber = parseInt(page, 10) || 0;
-            const pageSize = 20;
-
             const query = { userId, parentId };
 
-            // if (parentId) {
-            //     query.parentId = parentId;
-            // }
-
-            const filesCursor = await dbClient.filesCollection.find(query)
-                .skip(pageNumber * pageSize)
+            const filesCursor = await dbClient.filesCollection.find(query,
+                { projection: { localPath: 0 } }
+            )
+                .skip(page * pageSize)
                 .limit(pageSize);
     
             const files = await filesCursor.toArray();
     
             const resultFiles = files.map(file => {
-                delete file.localPath;
+                // delete file.localPath;
                 const { _id, ...rest } = file;
                 return { id: _id, ...rest };
             });
@@ -257,13 +254,13 @@ export default class FilesController {
                     console.error(err);
                     return res.status(404).send({ error: "Not found" });
                 }
-                const mimeType = mime.lookup(file.name);
+                const mimeType = mime.contentType(file.name);
                 res.set('Content-Type', mimeType);
-                res.status(200).send(data);
+                return res.status(200).send(data);
             })
         } catch(err) {
             console.error(err);
-            res.status(404).send({ error: "Not found" });
+            return res.status(404).send({ error: "Not found" });
         }
     }
 }
