@@ -87,23 +87,22 @@ export default class FilesController {
 
     static async getShow(req, res) {
         const { id } = req.params;
-        // console.log(req.params);
-        // console.log(id);
-
         const token = req.header('X-Token');
         const key = `auth_${token}`;
+
         try {
             const userId = await redisClient.get(key);
             if (!userId) {
-                return res.status(401).send({"error":"Unauthorized"});
+                return res.status(401).send({ error: "Unauthorized" });
             }
 
             const file = await dbClient.filesCollection.findOne({
                 _id: new ObjectId(id),
                 userId
-            })
+            });
+
             if (!file) {
-                return res.status(404).send({"error":"Not found"});
+                return res.status(404).send({ error: "Not found" });
             }
 
             const { _id, ...rest } = file;
@@ -112,30 +111,34 @@ export default class FilesController {
             delete responseFile.localPath;
             res.status(200).send(responseFile);
         } catch(err) {
-            console.log(err);
-            res.status(401).send({"error":"Unauthorized"});
+            console.error(err);
+            res.status(401).send({ error: "Unauthorized" });
         }
     }
 
     static async getIndex(req, res) {
-        const { parentId, page } = req.query;
+        const { parentId = '0', page = 0 } = req.query;
         const token = req.header('X-Token');
         const key = `auth_${token}`;
+
         try {
             const userId = await redisClient.get(key);
             if (!userId) {
-                return res.status(401).send({ "error": "Unauthorized" });
+                return res.status(401).send({ error: "Unauthorized" });
             }
-    
+
             const pageNumber = parseInt(page, 10) || 0;
-            const query = { userId };
-            if (parentId) {
-                query.parentId = parentId;
-            }
-    
+            const pageSize = 20;
+
+            const query = { userId, parentId };
+
+            // if (parentId) {
+            //     query.parentId = parentId;
+            // }
+
             const filesCursor = await dbClient.filesCollection.find(query)
-                .skip(pageNumber * 20)
-                .limit(20);
+                .skip(pageNumber * pageSize)
+                .limit(pageSize);
     
             const files = await filesCursor.toArray();
     
@@ -148,7 +151,7 @@ export default class FilesController {
             res.status(200).send(resultFiles);
         } catch (err) {
             console.error(err);
-            res.status(401).send({ error: "Unauthorized"});
+            res.status(401).send({ error: "Unauthorized" });
         }
     }
 
