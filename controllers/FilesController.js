@@ -15,40 +15,40 @@ export default class FilesController {
         try {
             const userId = await redisClient.get(key);
             if (!userId) {
-                return res.status(401).send({"error":"Unauthorized"});
+                return res.status(401).send({ error: "Unauthorized" });
             }
 
             let { name, type, parentId, isPublic, data } = req.body;
             const acceptedTypes = ['folder', 'file', 'image'];
             
             if (!name) {
-                res.status(400).send({"error":"Missing file"});
+                return res.status(400).send({ error: "Missing file" });
             }
 
             if (!type || acceptedTypes.indexOf(type) === -1) {
-                res.status(400).send({"error":"Missing type"});
+                return res.status(400).send({ error: "Missing type" });
             }
 
             if (!parentId) {
                 parentId = 0;
             } else {
-                const parent = await dbClient.filesCollection.find({parentId});
+                const parent = await dbClient.filesCollection.findOne({ _id: ObjectId(parentId) });
                 if (!parent) {
-                    res.status(400).send({"error":"Parent not found"});
+                    return res.status(400).send({ error: "Parent not found" });
                 }
                 if (parent.type !== 'folder') {
-                    res.status(400).send({"error":"Parent is not a folder"});
+                    return res.status(400).send({ error: "Parent is not a folder" });
                 }
             }
 
             if (!data && type !== 'folder') {
-                res.status(400).send('Missing type');
+                return res.status(400).send({ error: "Missing data" });
             }
 
-            if (!isPublic) isPublic = false;
+            if (isPublic === undefined) isPublic = false;
 
             const file = {
-                userId,
+                userId: ObjectId(userId),
                 name,
                 type,
                 parentId,
@@ -61,27 +61,28 @@ export default class FilesController {
 
                 const fileToReturn = { ...file, id: file._id };
                 delete fileToReturn._id;
-                res.status(201).send(fileToReturn);
+                return res.status(201).send(fileToReturn);
             } else {
                 const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
-                const localPath = uuidv4();
+                const localPath = `${folderPath}/${uuidv4()}`;
 
                 await fs.promises.mkdir(folderPath, { recursive: true})
 
-                await fs.promises.writeFile(`${folderPath}/${localPath}`, base64.decode(data))
+                await fs.promises.writeFile(localPath, Buffer.from(data, 'base64'))
 
-                file['localPath'] = `${folderPath}/${localPath}`;
+                file['localPath'] = localPath;
                 const result = await dbClient.filesCollection.insertOne(file);
                 file._id = result.insertedId;
+
                 const fileToReturn = { ...file, id: file._id };
                 delete fileToReturn._id;
                 delete fileToReturn.localPath;
 
-                res.status(201).send(fileToReturn);
+                return res.status(201).send(fileToReturn);
             }
         } catch(err) {
             console.error(err);
-            res.status(401).send({"error":"Unauthorized"});
+            res.status(401).send({ error: "Unauthorized" });
         }
     }
 
