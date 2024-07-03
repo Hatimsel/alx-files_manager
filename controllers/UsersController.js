@@ -2,7 +2,14 @@ import dbClient from "../utils/db";
 import sha1 from 'sha1';
 import redisClient from "../utils/redis";
 import ObjectId from 'mongodb';
+import Bull from 'bull';
 
+const userQueue = new Bull('userQueue', {
+    redis: {
+        host: '127.0.0.1',
+        port: 6379
+    }
+});
 
 export default class UsersController {
     static async postNew(req, res) {
@@ -22,6 +29,8 @@ export default class UsersController {
             try {
                 const newUser = await dbClient.db.collection('users')
                     .insertOne({email, password: hashedPass});
+                
+                await userQueue.add({ userId: newUser._id });
                 return res.status(201).send({"id": newUser.insertedId, "email": email});
             } catch(err) {
                 console.log(err);

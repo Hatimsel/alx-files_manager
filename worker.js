@@ -39,4 +39,25 @@ fileQueue.process( async (job) => {
     } catch(err) {
         console.error(err);
     }
-})
+});
+
+const userQueue = new Bull('userQueue', {
+    redis: {
+        host: '127.0.0.1',
+        port: 6379
+    }
+});
+
+userQueue.process(async (job) => {
+    if (!job.userId) throw new Error('Missing userId');
+    try {
+        const user = await dbClient.usersCollection.findOne({
+            // _id: ObjectId(job.userId)
+            _id: job.userId
+        });
+        if (!user) throw new Error('User not found');
+        console.log(`Welcome ${user.email}!`);
+    } catch(err) {
+        console.error(err);
+    }
+});

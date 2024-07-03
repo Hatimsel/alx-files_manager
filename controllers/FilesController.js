@@ -83,7 +83,7 @@ export default class FilesController {
                 file._id = result.insertedId;
 
                 if (type === 'image') {
-                    fileQueue.add({ userId: file.userId, fileId: file._id });
+                    await fileQueue.add({ userId: file.userId, fileId: file._id });
                 }
 
                 const fileToReturn = { ...file, id: file._id };
