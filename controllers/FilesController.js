@@ -74,9 +74,9 @@ export default class FilesController {
                 const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
                 const localPath = `${folderPath}/${uuidv4()}`;
 
-                await fs.promises.mkdir(folderPath, { recursive: true})
+                await fs.promises.mkdir(folderPath, { recursive: true});
 
-                await fs.promises.writeFile(localPath, Buffer.from(data, 'base64'))
+                await fs.promises.writeFile(localPath, Buffer.from(data, 'base64'));
 
                 file['localPath'] = localPath;
                 const result = await dbClient.filesCollection.insertOne(file);
@@ -158,7 +158,7 @@ export default class FilesController {
                 return { id: _id, ...rest };
             });
     
-            res.status(200).send(resultFiles);
+            return res.status(200).send(resultFiles);
         } catch (err) {
             console.error(err);
             return res.status(401).send({ error: "Unauthorized" });
@@ -248,9 +248,6 @@ export default class FilesController {
                 const token = req.header('X-Token');
                 const userId = await redisClient.get(`auth_${token}`);
                 if (!userId) { //|| file.userId !== userId) {
-                    console.log(userId);
-                    console.log(file.userId);
-                    console.log('ispublic');
                     return res.status(404).send({ error: "Not found" });
                 }
             }
@@ -263,7 +260,7 @@ export default class FilesController {
             if (size) {
                 const sizes = ['500', '250', '100'];
                 if (!sizes.includes(size)) {
-                    return res.status(400).send({ error: "Invalid size" });
+                    return res.status(404).send({ error: "Not found" });
                 }
                 filePath = `${filePath}_${size}`;
             }

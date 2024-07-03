@@ -11,32 +11,32 @@ const fileQueue = new Bull('fileQueue', {
     }
 });
 
-fileQueue.process(async (job) => {
-    const { userId, fileId } = job.data;
-
-    if (!fileId) throw new Error('Missing fileId');
-    if (!userId) throw new Error('Missing userId');
+fileQueue.process( async (job) => {
+    if (!job.fileId) throw new Error('Missing fileId');
+    if (!job.userId) throw new Error('Missing userId');
 
     const file = await dbClient.filesCollection.findOne({
-        _id: ObjectId(fileId),
-        userId: ObjectId(userId)
+        _id: job.fileId,
+        userId: job.userId
     });
     if (!file) throw new Error('File not found');
 
-    const sizes = [500, 250, 100];
-    for (const size of sizes) {
-        const thumbnail = await imageThumbnail(file.localPath, {
-            width: size
+    try {
+        const thumbnail500 = await imageThumbnail(file.localPath, {
+            width: 500
         });
-        const thumbnailPath = `${file.localPath}_${size}`;
-        await fs.promises.writeFile(thumbnailPath, thumbnail);
+        await fs.promises.writeFile(`${file.localPath}_500`, thumbnail500);
+
+        const thumbnail250 = await imageThumbnail(file.localPath, {
+            width: 250
+        });
+        await fs.promises.writeFile(`${file.localPath}_250`, thumbnail250);
+
+        const thumbnail100 = await imageThumbnail(file.localPath, {
+            width: 100
+        });
+        await fs.promises.writeFile(`${file.localPath}_100`, thumbnail100);
+    } catch(err) {
+        console.error(err);
     }
-});
-
-fileQueue.on('completed', (job) => {
-    console.log(`Job ${job.id} completed successfully`);
-});
-
-fileQueue.on('failed', (job, err) => {
-    console.error(`Job ${job.id} failed: ${err.message}`);
-});
+})
