@@ -25,10 +25,10 @@ export default class AuthController {
 
             redisClient.set(key, user._id.toString(), duration);
 
-            res.status(200).send({"token":token});
+            return res.status(200).send({"token":token});
         } catch(err) {
             console.log(err);
-            res.status(401).send({"error":"Unauthorized"});
+            return res.status(401).send({"error":"Unauthorized"});
         }
     }
 
@@ -37,10 +37,10 @@ export default class AuthController {
         const key = `auth_${token}`;
         try {
             await redisClient.del(key);
-            res.status(204).send();
+            return res.status(204).send();
         } catch(err) {
             console.log(err);
-            res.status(401).send({"error":"Unauthorized"});
+            return res.status(401).send({"error":"Unauthorized"});
         }
     }
 }
