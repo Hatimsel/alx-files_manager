@@ -29,7 +29,7 @@ export default class FilesController {
       const acceptedTypes = ['folder', 'file', 'image'];
 
       if (!name) {
-        return res.status(400).send({ error: 'Missing file' });
+        return res.status(400).send({ error: 'Missing name' });
       }
 
       if (!type || acceptedTypes.indexOf(type) === -1) {
