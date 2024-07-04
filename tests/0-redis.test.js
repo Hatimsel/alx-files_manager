@@ -1,4 +1,4 @@
-port { expect, use, should } from 'chai';
+import { expect, use, should } from 'chai';
 import chaiHttp from 'chai-http';
 import { promisify } from 'util';
 import redisClient from '../utils/redis';
